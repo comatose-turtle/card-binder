@@ -1,0 +1,65 @@
+.card {
+    width: 250px;
+    height: 350px;
+    border-radius: 10px;
+    position: relative;
+    background-image: url('./src/assets/cardTemplate.png');
+    background-size: 100% 100%;
+
+    &.big-card {
+        width: 375px;
+        height: 525px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.card-content-container {
+    padding: 10px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+.big-card .card-content-container {
+    padding: 50px;
+}
+
+.image-container {
+    width: 100%;
+    height: 175px;
+    text-align: center;
+}
+.big-card .image-container {
+    height: 200px;
+    margin-bottom: 5px;
+}
+
+.description {
+    text-align: justify;
+    font-size: 0.8em;
+    font-family: 'Cormorant Garamond', 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-weight: bold;
+    padding: 5px 13px;
+    line-height: 1.25;
+}
+.big-card .description {
+    font-size: 1em;
+    padding: 9px 20px;
+}
+
+.quantity {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    font-size: 0.7em;
+    font-weight: bolder;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    border: 1px solid black;
+    border-radius: 15px;
+    padding: 5px;
+    background-color: white;
+}

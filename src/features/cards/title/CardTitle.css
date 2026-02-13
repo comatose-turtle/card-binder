@@ -1,0 +1,36 @@
+.card-title {
+    height: 35px;
+    width: 100%;
+    position: relative;
+
+    > div {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        transform: translate(0, -50%);
+    }
+
+    textpath {
+        font-family: 'Cormorant SC', 'Times New Roman', Times, serif;
+        font-weight: 700;
+
+        &[data-contentlength="0"] { font-size: 1.7em; }
+        &[data-contentlength="1"] { font-size: 1.5em; }
+        &[data-contentlength="2"] { font-size: 1.3em; }
+        &[data-contentlength="3"] { font-size: 1.2em; }
+        &[data-contentlength="4"] { font-size: 1.1em; }
+        &[data-contentlength="5"] { font-size: 1em; }
+        &[data-contentlength="6"] { font-size: 0.8em; }
+        &[data-contentlength="7"] { font-size: 0.7em; }
+        &[data-contentlength="8"] { font-size: 0.6em; }
+        &[data-contentlength="9"] { font-size: 0.5em; }
+    }
+}
+
+.small-card .card-title {
+    height: 15px;
+}
+.big-card .card-title {
+    height: 47.5px;
+}

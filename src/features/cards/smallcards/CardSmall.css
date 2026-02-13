@@ -1,0 +1,46 @@
+.small-card {
+    width: 125px;
+    height: 175px;
+    border-radius: 5px;
+    position: relative;
+    background-image: url('./src/assets/smallCardTemplate.png');
+    background-size: 100% 100%;
+
+    transition: all 0.25s ease-out;
+
+    .card-content-container {
+        padding: 5px;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    }
+
+    .image-container {
+         height: 133px;
+    }
+
+    &.greyed {
+        -webkit-filter: grayscale(75%); /* Safari, Chrome, Opera */
+        -moz-filter: grayscale(75%);    /* Firefox */
+        -ms-filter: grayscale(75%);    /* Internet Explorer */
+        -o-filter: grayscale(75%);     /* Opera */
+        filter: grayscale(75%);
+        opacity: 50%;
+    }
+    
+    .quantity {
+        bottom: -7px;
+        right: -7px;
+        font-size: 0.5em;
+    }
+}
+
+.clickable-card {
+    border-radius: 5px;
+    transition: all 0.25s ease-out;
+    &:hover {
+        box-shadow: 0 0 15px 7px rgba(172, 224, 0, 0.5);
+    }
+}

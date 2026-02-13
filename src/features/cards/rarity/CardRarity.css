@@ -1,0 +1,73 @@
+.rarity {
+    height: 15px;
+    width: 100%;
+    position: relative;
+
+    img {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        height: 25px;
+        transform: translate(-50%, 0);
+    }
+
+    .glow {
+        position: absolute;
+        bottom: 9px;
+        left: 50%;
+        height: 0;
+        width: 0;
+        
+        &.common {
+            box-shadow: 0 0 15px 7px whitesmoke;
+        }
+        &.uncommon {
+            box-shadow: 0 0 15px 7px rgb(27 250 4);
+        }
+        &.rare {
+            box-shadow: 0 0 15px 7px rgb(63 77 252);
+        }
+        &.epic {
+            box-shadow: 0 0 15px 7px rgb(220 63 252);
+        }
+        &.mythic {
+            box-shadow: 0 0 15px 7px rgb(252 192 63);
+        }
+    }
+}
+
+.big-card .rarity {
+    height: 20px;
+    img {
+        height: 40px;
+    }
+}
+
+.small-card .rarity {
+    height: 7px;
+    
+    img {
+        bottom: -2px;
+        height: 12px;
+    }
+    
+    .glow {
+        bottom: 4px;
+        
+        &.common {
+            box-shadow: 0 0 8px 4px white;
+        }
+        &.uncommon {
+            box-shadow: 0 0 8px 4px rgb(27 250 4);
+        }
+        &.rare {
+            box-shadow: 0 0 8px 4px rgb(63 77 252);
+        }
+        &.epic {
+            box-shadow: 0 0 8px 4px rgb(220 63 252);
+        }
+        &.mythic {
+            box-shadow: 0 0 8px 4px rgb(252 192 63);
+        }
+    }
+}
