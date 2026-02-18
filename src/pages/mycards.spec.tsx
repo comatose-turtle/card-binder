@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { ComponentProps } from "react";
 import * as supabase from "@supabase/supabase-js";
 import MyCardsRoute, { clientLoader, MyCardsLoaderProps } from "./mycards";
-import { useOutletContext, useSearchParams } from "react-router";
+import { createRoutesStub, useOutletContext, useSearchParams } from "react-router";
 import { Cards } from "../features/cards/Cards";
 
 var mockClient : {
@@ -35,70 +35,26 @@ jest.mock("@supabase/supabase-js", () => ({
 jest.mock("react-router", () => ({
   __esModule: true,
   useOutletContext: jest.fn(),
-  useSearchParams: jest.fn()
+  useSearchParams: jest.fn(),
+  createRoutesStub: jest.requireActual("react-router").createRoutesStub,
 }));
 
 jest.mock("../features/cards/Cards", () => ({
   __esModule: true,
-  Cards: ({cards} : ComponentProps<typeof Cards>) => cards.map(card => <div>A small card: {card.name}</div>)
+  Cards: ({cards} : ComponentProps<typeof Cards>) => cards.map(card => <div key={card.id}>A small card: {card.name}</div>)
 }));
 
 jest.mock("../app/auth.client", () => (jest.fn(() => ({userId: 1234}))));
 
 describe("mycards Route", () => {
-  let loaderData : MyCardsLoaderProps;
-  let defaultProps : ComponentProps<typeof MyCardsRoute>;
-
-  beforeEach(async () => {
-    loaderData = {
-      userId: "tony",
-      inventory: {
-        i: 1,
-        v: 5,
-        x: 10,
-        c: 100,
-        d: 50,
-      }
-    };
-    defaultProps = {
-        loaderData: loaderData,
-        params: {},
-        matches: [{
-            id: "root",
-            params: {},
-            pathname: "",
-            data: undefined,
-            loaderData: undefined,
-            handle: undefined
-        }, {
-            id: "pages/cardslist",
-            params: {},
-            pathname: "",
-            data: {
-              cards: []
-            },
-            loaderData: {
-              cards: []
-            },
-            handle: undefined
-        }, {
-            id: "pages/mycards",
-            params: {},
-            pathname: "",
-            data: loaderData,
-            loaderData: loaderData,
-            handle: undefined
-        }]
-    };
-    (useSearchParams as jest.Mock).mockReturnValue([new URLSearchParams({"things":"stuff"}), jest.fn()])
-
-    mockInvoke.mockClear();
-    mockInvoke.mockResolvedValue(
-      { data: { status: "ok", inventory: {c: 100} } }
-    );
-  });
-
   describe("clientLoader", () => {
+    beforeEach(async () => {
+      mockInvoke.mockClear();
+      mockInvoke.mockResolvedValue(
+        { data: { status: "ok", inventory: {c: 100} } }
+      );
+    });
+
     test("fetches data from supabase", async () => {
       await clientLoader();
       expect(process.env.SUPABASE_URL).not.toEqual(""); // Sanity check
@@ -117,7 +73,22 @@ describe("mycards Route", () => {
   });
 
   describe("Component", () => {
-    beforeEach(() => {
+    let loaderData : MyCardsLoaderProps;
+    let Component : ReturnType<typeof createRoutesStub>;
+
+    beforeEach(async () => {
+      loaderData = {
+        userId: "tony",
+        inventory: {
+          i: 1,
+          v: 5,
+          x: 10,
+          c: 100,
+          d: 50,
+        }
+      };
+      (useSearchParams as jest.Mock).mockReturnValue([new URLSearchParams({"things":"stuff"}), jest.fn()])
+
       const cards = [{
         id: 100,
         name: "Test Title",
@@ -135,12 +106,20 @@ describe("mycards Route", () => {
       }];
       (useOutletContext as jest.Mock).mockReturnValue(cards);
 
+      Component = createRoutesStub([{
+        path: "/mycards",
+        // @ts-expect-error
+        Component: MyCardsRoute,
+        loader: () => loaderData,
+        HydrateFallback: () => <div />
+      }]);
+
       mockChannel.mockClear()
       mockChannel.mockReturnValue({ on: mockChannel, subscribe: mockChannel });
     })
 
     test("renders a list of cards", async () => {
-      render(<MyCardsRoute {...defaultProps} loaderData={loaderData} />);
+      render(<Component initialEntries={["/mycards"]} />);
       return expect(screen.findAllByText("A small card", {exact: false})).resolves.toHaveLength(2);
     });
   })

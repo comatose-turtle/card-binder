@@ -57,3 +57,7 @@ export function links() {
 export default function Root() {
   return <Outlet />;
 }
+
+export function HydrateFallback() {
+  return <div>Loading...</div>
+}

@@ -3,21 +3,23 @@ import { render, screen } from "@testing-library/react";
 import AllCardsRoute from "./allcards";
 import { CardType } from "../features/cards/card";
 import { Cards } from "../features/cards/Cards";
-import { useOutletContext } from "react-router";
+import { createRoutesStub, useOutletContext as mockUseOutletContext } from "react-router";
 
 jest.mock("../features/cards/Cards", () => ({
   __esModule: true,
-  Cards: ({cards} : ComponentProps<typeof Cards>) => cards.map(card => <div>A small card: {card.name}</div>)
+  Cards: ({cards} : ComponentProps<typeof Cards>) => cards.map(card => <div key={card.id}>A small card: {card.name}</div>)
 }));
 
 jest.mock("react-router", () => ({
   __esModule: true,
-  useOutletContext: jest.fn()
+  useOutletContext: jest.fn(),
+  useNavigation: jest.fn(),
+  createRoutesStub: jest.requireActual("react-router").createRoutesStub,
 }));
 
 describe("allcards", () => {
   let cards : CardType[];
-  let defaultProps : ComponentProps<typeof AllCardsRoute>;
+  let Component : ReturnType<typeof createRoutesStub>;
 
   beforeEach(async () => {
     cards = [{
@@ -35,31 +37,18 @@ describe("allcards", () => {
       rarity: 5,
       quantity: 10,
     }];
-    defaultProps = {
-      loaderData: {cards},
-      params: {},
-      matches: [{
-        id: "root",
-        params: {},
-        pathname: "",
-        data: undefined,
-        loaderData: undefined,
-        handle: undefined
-      }, {
-        id: "pages/allcards",
-        params: {},
-        pathname: "",
-        data: {cards},
-        loaderData: {cards},
-        handle: undefined
-      }]
-    };
+    (mockUseOutletContext as jest.Mock).mockReturnValue(cards);
 
-    (useOutletContext as jest.Mock).mockReturnValue(cards);
+    Component = createRoutesStub([{
+      path: "/allcards",
+      Component: AllCardsRoute,
+      loader: () => ({cards}),
+      HydrateFallback: () => <div />
+    }])
   });
 
   test("renders a list of cards", async () => {
-    render(<AllCardsRoute {...defaultProps} />);
+    render(<Component initialEntries={["/allcards"]} />);
     const cards = await screen.findAllByText("A small card", {exact: false});
     expect(cards).toHaveLength(2);
   });
