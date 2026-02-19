@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { ComponentProps } from "react";
 import * as supabase from "@supabase/supabase-js";
+import * as AuthClient from "../app/auth.client";
 import MyCardsRoute, { clientLoader, MyCardsLoaderProps } from "./mycards";
 import { createRoutesStub, useOutletContext, useSearchParams } from "react-router";
 import { Cards } from "../features/cards/Cards";
@@ -44,32 +45,81 @@ jest.mock("../features/cards/Cards", () => ({
   Cards: ({cards} : ComponentProps<typeof Cards>) => cards.map(card => <div key={card.id}>A small card: {card.name}</div>)
 }));
 
-jest.mock("../app/auth.client", () => (jest.fn(() => ({userId: 1234}))));
+jest.mock("../app/auth.client", () => ({
+  __esModule: true,
+  default: jest.fn()
+}));
 
 describe("mycards Route", () => {
-  describe("clientLoader", () => {
-    beforeEach(async () => {
-      mockInvoke.mockClear();
-      mockInvoke.mockResolvedValue(
-        { data: { status: "ok", inventory: {c: 100} } }
-      );
-    });
+  test("creates a supabase server", async () => {
+    jest.isolateModules(() => {
+      const saveMock = supabase.createClient;
+      (supabase.createClient as jest.Mock).mockImplementation(jest.fn());
+      require("./mycards");
 
-    test("fetches data from supabase", async () => {
-      await clientLoader();
       expect(process.env.SUPABASE_URL).not.toEqual(""); // Sanity check
       expect(process.env.SUPABASE_ANON_KEY).not.toEqual(""); // Sanity check
       expect(supabase.createClient).toHaveBeenCalledWith(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+      
+      (supabase.createClient as jest.Mock).mockImplementation(saveMock);
     })
+  });
 
-    test("invokes getInventory from supabase", async () => {
-      await clientLoader();
-      expect(mockInvoke).toHaveBeenCalledWith("getInventory", {body: { userId: 1234 }});
-    })
+  describe("clientLoader", () => {
+    beforeEach(() => {
+      mockInvoke.mockResolvedValue({data:{}});
+    });
 
-    test("returns data from supabase", async () => {
-      return expect(clientLoader()).resolves.toEqual({ userId: 1234, inventory: { c: 100 } });
-    })
+    describe("with no user ID", () => {
+      beforeAll(() => {
+        (AuthClient.default as jest.Mock).mockReturnValue({});
+      });
+
+      test("does not invoke a function from supabase", async () => {
+        await clientLoader();
+        expect(mockInvoke).not.toHaveBeenCalled();
+      });
+
+      test("returns no data", async () => {
+        return expect(clientLoader()).resolves.toBeNull();
+      });
+    });
+
+    describe("with a user ID", () => {
+      beforeAll(() => {
+        (AuthClient.default as jest.Mock).mockReturnValue({userId: "1234"});
+      });
+
+      test("invokes getInventory from supabase", async () => {
+        await clientLoader();
+        expect(mockInvoke).toHaveBeenCalledWith("getInventory", {body: { userId: "1234" }});
+      });
+
+      describe("if supabase returns a valid response", () => {
+        beforeEach(() => {
+          mockInvoke.mockResolvedValue(
+            { data: { status: "ok", inventory: {c: 100} } }
+          );
+        });
+
+        test("returns response data", async () => {
+          return expect(clientLoader()).resolves.toEqual({ userId: "1234", inventory: { c: 100 } });
+        });
+      });
+
+      describe("if supabase returns a pending response", () => {
+        beforeEach(() => {
+          mockInvoke.mockClear();
+          mockInvoke.mockResolvedValue(
+            { data: { status: "pending" } }
+          );
+        });
+
+        test("returns empty data", async () => {
+          return expect(clientLoader()).resolves.toEqual({ userId: "1234", inventory: {} })
+        });
+      });
+    });
   });
 
   describe("Component", () => {

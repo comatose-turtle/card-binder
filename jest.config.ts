@@ -15,4 +15,5 @@ export default {
   setupFiles: ["<rootDir>/jest.setEnvVars.js"],
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   verbose: true,
+  clearMocks: true,
 } satisfies Config;
